@@ -7,6 +7,7 @@ from data.schemas import DataUpload
 from database import get_db, get_clickhouse_client, engine
 from analytics.models import AnalysisJob 
 from data.models import DataMetrics
+from analytics.schemas import AnalysisResult
 import uuid
 import numpy as np
 import json
