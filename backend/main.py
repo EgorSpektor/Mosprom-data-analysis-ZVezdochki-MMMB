@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from database import get_db, engine
-from models import Base
+from database import Base
 from analytics.router import AnalysisJob
 from analytics.router import router as anal_router
 from data.router import router as data_router
