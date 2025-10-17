@@ -5,7 +5,8 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from data.schemas import DataUpload
 from database import get_db, get_clickhouse_client, engine
-from models import Base, DataFile, AnalysisJob, DataMetrics
+from analytics.models import AnalysisJob 
+from data.models import DataMetrics
 import uuid
 import numpy as np
 import json
