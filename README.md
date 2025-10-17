@@ -1,1 +1,1 @@
-# Mosprom-data-analysis-ZVezdochki-MMMB
+# Mosprom Data Analysis - Звездочки МММБ

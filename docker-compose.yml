@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mosprom_postgres
+    environment:
+      POSTGRES_DB: mosprom_data
+      POSTGRES_USER: mosprom_user
+      POSTGRES_PASSWORD: mosprom_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mosprom_user -d mosprom_data"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: mosprom_clickhouse
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native client
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./database/clickhouse:/docker-entrypoint-initdb.d
+    environment:
+      CLICKHOUSE_DB: mosprom_analytics
+      CLICKHOUSE_USER: mosprom_user
+      CLICKHOUSE_PASSWORD: mosprom_password
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build: ./backend
+    container_name: mosprom_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./backend:/app
+    environment:
+      - PYTHONPATH=/app
+      - DATABASE_URL=postgresql://mosprom_user:mosprom_password@postgres:5432/mosprom_data
+      - CLICKHOUSE_URL=http://clickhouse:8123
+      - CLICKHOUSE_USER=mosprom_user
+      - CLICKHOUSE_PASSWORD=mosprom_password
+      - CLICKHOUSE_DB=mosprom_analytics
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: mosprom_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  node_modules:
