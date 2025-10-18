@@ -1,17 +1,24 @@
-import os
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+import clickhouse_connect
+
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Text, Boolean
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import as_declarative
+import os
+from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import clickhouse_connect
 
 # PostgreSQL конфигурация
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://mosprom_user:mosprom_password@localhost:5432/mosprom_data")
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://mosprom_user:mosprom_password@localhost:5432/mosprom_data")
+engine = create_async_engine(DATABASE_URL)
+SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
 
-# ClickHouse конфигурация
 CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
 CLICKHOUSE_PORT = int(os.getenv("CLICKHOUSE_PORT", "8123"))
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "mosprom_user")
@@ -38,3 +45,17 @@ def get_db():
 
 # Метаданные для работы с таблицами
 metadata = MetaData()
+
+
+
+@as_declarative()
+class Base:
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+
+
+
+
