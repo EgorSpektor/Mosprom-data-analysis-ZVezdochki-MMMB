@@ -1,42 +1,41 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import DataFilesList from './components/DataFilesList'
-import DataPreview from './components/DataPreview'
-import AnalysisResults from './components/AnalysisResults'
-import Analytics from './components/Analytics'
-import './App.css'
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import Dashboard from './components/Dashboard'; //дашборд с гистограммами и поиском по ИНН
+import CompanyReport from './components/CompanyReport';
+import './App.css';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000'
-})
+});
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [analysisData, setAnalysisData] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'data' | 'analytics'>('data')
+  const [activeTab, setActiveTab] = useState<'main' | 'report'>('main');
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const [companyInn, setCompanyInn] = useState<string>(''); // для отчета
 
+  // Проверка статуса API
   const { data: healthCheck } = useQuery({
     queryKey: ['health'],
     queryFn: () => api.get('/health').then(res => res.data)
-  })
+  });
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>Mosprom Data Analysis</h1>
         <nav className="nav-tabs">
-          <button 
-            className={`nav-tab ${activeTab === 'data' ? 'active' : ''}`}
-            onClick={() => setActiveTab('data')}
+          <button
+            className={`nav-tab ${activeTab === 'main' ? 'active' : ''}`}
+            onClick={() => setActiveTab('main')}
           >
-            Данные
+            Основная
           </button>
-          <button 
-            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
+          <button
+            className={`nav-tab ${activeTab === 'report' ? 'active' : ''}`}
+            onClick={() => setActiveTab('report')}
           >
-            Аналитика
+            Отчет
           </button>
         </nav>
         <div className="status">
@@ -45,36 +44,26 @@ function App() {
       </header>
 
       <main className="app-main">
-        {activeTab === 'data' ? (
-          <>
-            <div className="sidebar">
-              <DataFilesList 
-                onFileSelect={setSelectedFile}
-                selectedFile={selectedFile}
-              />
-            </div>
+        {activeTab === 'main' && (
+          <div className="content full-width" style={{ padding: '2rem' }}>
 
-            <div className="content">
-              {selectedFile && (
-                <DataPreview 
-                  filename={selectedFile}
-                  onAnalysisComplete={setAnalysisData}
-                />
-              )}
-              
-              {analysisData && (
-                <AnalysisResults data={analysisData} />
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="content full-width">
-            <Analytics />
+
+            {/* Дашборд с гистограммами */}
+            <Dashboard />
           </div>
+        )}
+
+        {activeTab === 'report' && (
+          <CompanyReport
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            companyInn={companyInn}
+            setCompanyInn={setCompanyInn}
+          />
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
