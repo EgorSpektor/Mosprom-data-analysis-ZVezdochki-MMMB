@@ -1,30 +1,63 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from settings import settings
 from sqlalchemy.ext.declarative import declarative_base
 import clickhouse_connect
 
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Text, Boolean
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import as_declarative
+import os
+from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import clickhouse_connect
 
-async def get_db():
-    """Получить сессию PostgreSQL"""
-    db = async_session_maker()
-    try:
-        yield db
-    finally:
-        await db.close()
+# PostgreSQL конфигурация
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://mosprom_user:mosprom_password@localhost:5432/mosprom_data")
 
+engine = create_async_engine(DATABASE_URL)
+SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
+
+# ClickHouse конфигурация
+CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
+CLICKHOUSE_PORT = int(os.getenv("CLICKHOUSE_PORT", "8123"))
+CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "mosprom_user")
+CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD", "mosprom_password")
+CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB", "mosprom_analytics")
 
 def get_clickhouse_client():
     """Получить клиент ClickHouse"""
     return clickhouse_connect.get_client(
-        host=settings.CLICKHOUSE_HOST,
-        port=settings.CLICKHOUSE_PORT,
-        username=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        database=settings.CLICKHOUSE_DB
+        host=CLICKHOUSE_HOST,
+        port=CLICKHOUSE_PORT,
+        username=CLICKHOUSE_USER,
+        password=CLICKHOUSE_PASSWORD,
+        database=CLICKHOUSE_DB
     )
 
-Base = declarative_base()
-engine = create_async_engine(settings.DATABASE_URL)
-async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+def get_db():
+    """Получить сессию PostgreSQL"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Метаданные для работы с таблицами
+metadata = MetaData()
+
+
+
+@as_declarative()
+class Base:
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+
+
+
 
