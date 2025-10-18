@@ -16,7 +16,7 @@ class Company(Base):
     export = Column(Float, nullable=False)
     email = Column(String, nullable=False)
     web = Column(String, nullable=False)
-
+    
     # relationships
     addresses = relationship("Adress", back_populates="company", lazy="selectin")
     staff = relationship("Staff", back_populates="company", lazy="selectin")
@@ -24,3 +24,5 @@ class Company(Base):
     profits = relationship("Profit", back_populates="company", lazy="selectin")
     investments = relationship("Investment", back_populates="company", lazy="selectin")
     taxes = relationship("Tax", back_populates="company", lazy="selectin")
+    lands = relationship("Land", back_populates="company", lazy="selectin")
+    leaders = relationship("Leader", back_populates="company", lazy="selectin")
