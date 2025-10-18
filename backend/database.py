@@ -15,12 +15,10 @@ import clickhouse_connect
 
 # PostgreSQL конфигурация
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://mosprom_user:mosprom_password@localhost:5432/mosprom_data")
-
 engine = create_async_engine(DATABASE_URL)
 SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
 
-# ClickHouse конфигурация
 CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
 CLICKHOUSE_PORT = int(os.getenv("CLICKHOUSE_PORT", "8123"))
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "mosprom_user")
