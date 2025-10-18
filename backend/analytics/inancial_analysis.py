@@ -32,3 +32,4 @@ class FinancialAnalyzer:
     def get_financial_ratios_sql(self) -> Dict:
         # ... реализация из предыдущего кода  
         pass
+      
