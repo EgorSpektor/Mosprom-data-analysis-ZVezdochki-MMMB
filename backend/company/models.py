@@ -3,6 +3,11 @@ from database import Base
 from sqlalchemy import Column, Float, Integer, String, BigInteger 
 from sqlalchemy.orm import relationship
 
+# Ensure related model modules are imported so their mappers are registered
+# before this Company mapper is configured (prevents 'Land' not found errors).
+import land.models  # noqa: F401
+import leader.models  # noqa: F401
+
 
 class Company(Base):
     __tablename__ = "companies"

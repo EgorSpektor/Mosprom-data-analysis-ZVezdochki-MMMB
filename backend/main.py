@@ -17,7 +17,6 @@ app.include_router(anal_router)
 app.include_router(data_router)
 app.include_router(company_router)
 
-Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
