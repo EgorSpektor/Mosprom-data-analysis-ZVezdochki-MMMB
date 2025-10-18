@@ -10,6 +10,7 @@ router = APIRouter(
 
 @router.get("/companies/{inn}/full")
 async def company_full(inn: int):
+    print(inn)
     """Return company and related records as one JSON object."""
     res = await CompanyDAO.get_company(inn)
     if res is None:
