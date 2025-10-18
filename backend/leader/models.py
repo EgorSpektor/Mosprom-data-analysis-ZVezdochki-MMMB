@@ -9,5 +9,5 @@ class Leader(Base):
     name = Column(String, nullable=False)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     phone_number = Column(String, nullable=False)
-
+    year = Column(Integer, nullable=False)
     company = relationship("Company", back_populates="leaders")

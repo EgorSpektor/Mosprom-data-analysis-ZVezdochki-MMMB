@@ -10,6 +10,6 @@ class Staff(Base):
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     value = Column(Float, nullable=False)
     value_payment = Column(Float, nullable=False)
-
+    year = Column(Integer, nullable=False)
     company = relationship("Company", back_populates="staff")
     

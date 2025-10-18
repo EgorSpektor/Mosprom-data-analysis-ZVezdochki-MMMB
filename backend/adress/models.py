@@ -2,7 +2,6 @@ from database import Base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Text, Boolean
 from sqlalchemy.orm import relationship
 
-
 class Adress(Base):
     __tablename__ = "adres"
 
@@ -11,7 +10,7 @@ class Adress(Base):
     name = Column(String, nullable=False)
     district = Column(String)
     area = Column(String)
-
+    year = Column(Integer, nullable=False)
     company = relationship("Company", back_populates="addresses")
 
 

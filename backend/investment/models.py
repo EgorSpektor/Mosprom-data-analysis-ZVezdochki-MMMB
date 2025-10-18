@@ -7,3 +7,4 @@ class Investment(Base):
     value = Column(Float, nullable=False)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     company = relationship("Company", back_populates="investments")
+    year = Column(Integer, nullable=False)

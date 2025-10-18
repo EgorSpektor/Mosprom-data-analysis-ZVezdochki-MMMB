@@ -14,6 +14,9 @@ from profit.models import Profit
 from revenue.models import Revenue
 from staff.models import Staff
 from tax.models import Tax
+from land.models import Land
+from leader.models import Leader
+
 
 
 # this is the Alembic Config object, which provides
