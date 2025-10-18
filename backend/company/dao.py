@@ -1,4 +1,4 @@
-from dao.base import  BaseDAO # Импортируем базовый DAO класс
+from dao.base import BaseDAO # Импортируем базовый DAO класс
 from company.models import Company # Импортируем модель Address из модуля adress.models
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -21,7 +21,7 @@ class CompanyDAO(BaseDAO): # Создаем класс, наследующий �
   model = Company # Указываем, что этот DAO работает с моделью Address
   
   @classmethod
-  async def get_company(inn: int):
+  async def get_company(cls, inn: int):
       """ORM variant: one async session, load company and related rows with separate queries.
 
       Returns a dict similar to the SQL variant, or None if company not found.

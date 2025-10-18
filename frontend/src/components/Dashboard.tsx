@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from 'axios';
 import {
   LineChart,
   Line,
@@ -8,6 +9,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+
+const api = axios.create({
+  baseURL: 'http://localhost:8000'
+});
 
 interface DataItem {
   inn: string;
@@ -30,14 +35,76 @@ const Dashboard = () => {
   const [input, setInput] = useState(""); // поле для нескольких ИНН
   const [filteredData, setFilteredData] = useState<DataItem[]>([]);
 
+  // Получаем данные компаний по ИНН
+  const fetchCompanyData = async (inn: string) => {
+    try {
+      const response = await api.get(`/company/companies/${inn}/full`);
+      return response.data;
+    } catch (error) {
+      console.error(`Ошибка получения данных для ИНН ${inn}:`, error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const inns = input.split(/\s+/).map((s) => s.trim()).filter(Boolean);
+    
     if (inns.length === 0) {
       setFilteredData([]);
-    } else {
-      const result = mockData.filter((item) => inns.includes(item.inn));
-      setFilteredData(result);
+      return;
     }
+
+    // Загружаем данные для каждого ИНН
+    Promise.all(inns.map(inn => fetchCompanyData(inn)))
+      .then(results => {
+        const validResults = results.filter(result => result && !result.error);
+        
+        // Преобразуем данные в формат для графиков
+        const transformedData: DataItem[] = [];
+        
+        validResults.forEach(companyInfo => {
+          if (companyInfo.company && companyInfo.revenues) {
+            const inn = companyInfo.company.inn.toString();
+            
+            // Группируем данные по годам
+            const revenuesByYear: { [year: number]: any } = {};
+            companyInfo.revenues.forEach((rev: any) => {
+              const year = new Date(rev.date).getFullYear();
+              if (!revenuesByYear[year]) {
+                revenuesByYear[year] = [];
+              }
+              revenuesByYear[year].push(rev);
+            });
+
+            // Создаем записи для каждого года
+            Object.entries(revenuesByYear).forEach(([year, revenues]) => {
+              const yearRevenues = revenues as any[];
+              const totalRevenue = yearRevenues.reduce((sum, rev) => sum + (rev.amount || 0), 0);
+              
+              transformedData.push({
+                inn,
+                year: parseInt(year),
+                employees: companyInfo.staff?.length || 0,
+                avgSalary: companyInfo.staff?.reduce((sum: number, s: any) => sum + (s.salary || 0), 0) / (companyInfo.staff?.length || 1) || 0,
+                revenue: totalRevenue,
+                netProfit: companyInfo.profits?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0,
+                taxesPaid: companyInfo.taxes?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0,
+                investments: companyInfo.investments?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0,
+                exportVolume: 0, // Нет данных в API
+                landArea: companyInfo.lands?.reduce((sum: number, l: any) => sum + (l.area || 0), 0) || 0,
+                productionArea: 0, // Нет данных в API
+                excises: 0, // Нет данных в API
+              });
+            });
+          }
+        });
+        
+        setFilteredData(transformedData);
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки данных компаний:', error);
+        setFilteredData([]);
+      });
   }, [input]);
 
   const charts = [
@@ -72,7 +139,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>Дашборд предприятий (Mock Data)</h1>
+      <h1>Дашборд предприятий</h1>
 
       <div style={{ marginBottom: "2rem" }}>
         <input
