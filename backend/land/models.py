@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from database import Base
+from sqlalchemy.orm import relationship
 
 
 class Land(Base):
@@ -10,3 +11,5 @@ class Land(Base):
     property_type = Column(String, nullable=False)
     usage = Column(String, nullable=False)
     owner = Column(String, nullable=False)
+
+    company = relationship("Company", back_populates="lands")
