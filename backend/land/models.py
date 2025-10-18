@@ -11,5 +11,5 @@ class Land(Base):
     property_type = Column(String, nullable=False)
     usage = Column(String, nullable=False)
     owner = Column(String, nullable=False)
-
+    year = Column(Integer, nullable=False)
     company = relationship("Company", back_populates="lands")
