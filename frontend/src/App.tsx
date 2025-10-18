@@ -45,20 +45,7 @@ function App() {
       <main className="app-main">
         {activeTab === 'main' && (
           <div className="content full-width" style={{ padding: '2rem' }}>
-            {/* 🔍 Поиск по ИНН компании */}
-            <input
-              type="text"
-              placeholder="Введите ИНН компании..."
-              value={companyInn}
-              onChange={(e) => setCompanyInn(e.target.value)}
-              style={{
-                padding: '10px',
-                width: '300px',
-                borderRadius: '8px',
-                border: '1px solid #ccc',
-                marginBottom: '2rem',
-              }}
-            />
+            
 
             {/* Дашборд с двумя гистограммами */}
             <Dashboard innFilter={companyInn} />
