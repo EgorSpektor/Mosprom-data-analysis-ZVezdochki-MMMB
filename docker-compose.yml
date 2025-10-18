@@ -19,25 +19,6 @@ services:
       timeout: 10s
       retries: 3
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: mosprom_clickhouse
-    ports:
-      - "8123:8123"  # HTTP interface
-      - "9000:9000"  # Native client
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - ./database/clickhouse:/docker-entrypoint-initdb.d
-    environment:
-      CLICKHOUSE_DB: mosprom_analytics
-      CLICKHOUSE_USER: mosprom_user
-      CLICKHOUSE_PASSWORD: mosprom_password
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   backend:
     build: ./backend
     container_name: mosprom_backend
