@@ -1,42 +1,40 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import DataFilesList from './components/DataFilesList'
-import DataPreview from './components/DataPreview'
-import AnalysisResults from './components/AnalysisResults'
-import Analytics from './components/Analytics'
-import './App.css'
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import Dashboard from './components/Dashboard'; //дашборд с гистограммами и поиском по ИНН
+import './App.css';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000'
-})
+});
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [analysisData, setAnalysisData] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'data' | 'analytics'>('data')
+  const [activeTab, setActiveTab] = useState<'main' | 'report'>('main');
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const [companyInn, setCompanyInn] = useState<string>(''); //поиск компании по инн
 
+  // Проверка статуса API
   const { data: healthCheck } = useQuery({
     queryKey: ['health'],
     queryFn: () => api.get('/health').then(res => res.data)
-  })
+  });
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>Mosprom Data Analysis</h1>
         <nav className="nav-tabs">
-          <button 
-            className={`nav-tab ${activeTab === 'data' ? 'active' : ''}`}
-            onClick={() => setActiveTab('data')}
+          <button
+            className={`nav-tab ${activeTab === 'main' ? 'active' : ''}`}
+            onClick={() => setActiveTab('main')}
           >
-            Данные
+            Основная
           </button>
-          <button 
-            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
+          <button
+            className={`nav-tab ${activeTab === 'report' ? 'active' : ''}`}
+            onClick={() => setActiveTab('report')}
           >
-            Аналитика
+            Отчет
           </button>
         </nav>
         <div className="status">
@@ -45,36 +43,70 @@ function App() {
       </header>
 
       <main className="app-main">
-        {activeTab === 'data' ? (
-          <>
-            <div className="sidebar">
-              <DataFilesList 
-                onFileSelect={setSelectedFile}
-                selectedFile={selectedFile}
-              />
-            </div>
+        {activeTab === 'main' && (
+          <div className="content full-width" style={{ padding: '2rem' }}>
+            {/* 🔍 Поиск по ИНН компании */}
+            <input
+              type="text"
+              placeholder="Введите ИНН компании..."
+              value={companyInn}
+              onChange={(e) => setCompanyInn(e.target.value)}
+              style={{
+                padding: '10px',
+                width: '300px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                marginBottom: '2rem',
+              }}
+            />
 
-            <div className="content">
-              {selectedFile && (
-                <DataPreview 
-                  filename={selectedFile}
-                  onAnalysisComplete={setAnalysisData}
-                />
-              )}
-              
-              {analysisData && (
-                <AnalysisResults data={analysisData} />
+            {/* Дашборд с двумя гистограммами */}
+            <Dashboard innFilter={companyInn} />
+          </div>
+        )}
+
+        {activeTab === 'report' && (
+          <div className="content full-width" style={{ padding: '2rem' }}>
+            <h2>Отчет по году и компании</h2>
+
+            {/* Выбор года */}
+            <label>
+              Год:
+              <select
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                style={{ marginLeft: '0.5rem', padding: '5px' }}
+              >
+                <option value="">--Выберите год--</option>
+                {/* Сюда можно подгружать список годов с бэкенда */}
+              </select>
+            </label>
+
+            {/* Ввод ИНН компании */}
+            <label style={{ marginLeft: '1rem' }}>
+              Компания (ИНН):
+              <input
+                type="text"
+                placeholder="Введите ИНН компании"
+                value={companyInn}
+                onChange={(e) => setCompanyInn(e.target.value)}
+                style={{ marginLeft: '0.5rem', padding: '5px' }}
+              />
+            </label>
+
+            {/* Здесь будет отображение отчета */}
+            <div style={{ marginTop: '2rem' }}>
+              {selectedYear && companyInn ? (
+                <p>Здесь будет отчет для компании с ИНН {companyInn} за {selectedYear} год</p>
+              ) : (
+                <p>Выберите год и введите ИНН компании, чтобы увидеть отчет</p>
               )}
             </div>
-          </>
-        ) : (
-          <div className="content full-width">
-            <Analytics />
           </div>
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
